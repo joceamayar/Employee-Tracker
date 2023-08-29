@@ -1,151 +1,246 @@
-import inquirer from 'inquirer'; 
+
+import inquirer from 'inquirer';
+import mysql from 'mysql2'
+
+// create the connection to database - keep outside. not in a function
+const connection = mysql.createConnection({
+    host: '127.0.0.1',
+    user: 'root',
+    password: '',
+    database: 'employees_db'
+});
+
+connection.connect(function (err) {
+    if (err) {
+        console.log(err)
+        throw err
+    }
+    console.log("DB connected!")
+    start()
+})
+
+// surround inside a function that gets called from inquirer.then?
+
+function viewAll() {
+    connection.query('SELECT * FROM `employee` ', //runing comand 
+        function (err, results, fields) { // saves results from mysql shell
+            //if err then 
+            console.log(err);
+            // console.table(results); // results contains rows returned by server
+            ///console.log(fields); // fields contains extra meta data about results, if available
 
 
+            // After done showing all employees, you kick them back to the main menu with a function call:
+        }
+    );
+}
+
+
+//--------------------User Choices------------------------
 const questions = [
-
-   //--------------------User Choices------------------------
 
     {
         type: 'list',
         name: 'choice',
         message: "What would you like to do?  ",
-        choices:["view all departments", "add a department", "view all employees", "add an employee", "view all roles", "add a role", "update  employee role", "Quit" ]
-    },
+        choices: ["view all departments", "add new department", "view all employees", "add new employee", "view all roles", "add new role", "update employee role", "Quit"]
 
-    //--------------------add department ------------------------
-
-    {
-      type: 'input',
-      name: 'addDepartment',
-      message: 'What is the name of the Department?',
-      when: (answers) => {
-        console.log(answers)
-        if (answers.choice === "add a department") {
-            return true;
-        }},
-     
     },
-   //--------------------add employee ------------------------
-    {
-        
-      type: 'input',
-      name: 'employeeFirstName',
-      message: 'whats is the employees first nanme', 
-      when: (answers) => {
-        console.log(answers)
-        if (answers.choice === "add an employee") {
-            return true;
-        }}
-    
-    },
-    {
-        type: 'input',
-        name: 'employeeLaststName',
-        message: 'whats is the employees last nanme',
-        when: (answers) => {
-            console.log(answers)
-            if (answers.choice === "add an employee") {
-                return true;
-            }}
-      
-      },
-      {
-        type: 'input',
-        name: 'employeeRole',
-        message:'what is the employees role', 
-        when: (answers) => {
-            console.log(answers)
-            if (answers.choice === "add an employee") {
-                return true;
-            }}
-      
-      },
-      {
-        type: 'input',
-        name: 'employeeManager',
-        message:'who is the employees manager',
-        when: (answers) => {
-            console.log(answers)
-            if (answers.choice === "add an employee") {
-                return true;
-            }}
-      
-      },
-     //--------------------add a role ------------------------
+]
+//--------------------View All Departments------------------------
 
-     {
-        
-        type: 'input',
-        name: 'roleName',
-        message: 'whats is the name of the role', 
-        when: (answers) => {
-          console.log(answers)
-          if (answers.choice === "add a role") {
-              return true;
-          }}
-      
-      },
-      {
-          type: 'input',
-          name: 'roleSalary',
-          message: 'whats is the salary for this role?',
-          when: (answers) => {
-              console.log(answers)
-              if (answers.choice === "add a role") {
-                  return true;
-              }}
-        
+const viewAllDepartments = () => {
+    connection.query("SELECT * from department", (err, data) => {
+        if (err) throw err
+        console.table(data)
+        start()
+    })
+}
+
+//--------------------Add New Departments------------------------
+
+
+const addNewDepartment = () => {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: 'addNewDepartment',
+            message: 'What is the name of the Department?',
+        }
+    ]).then(answers => {
+        connection.query("INSERT INTO department SET ?",
+            {
+                name: answers.addNewDepartment
+            }
+        )
+        start()
+    })
+}
+
+//--------------------View All Employees------------------------
+
+
+const viewAllEmployees = () => {
+    connection.query("SELECT * FROM employees", (err, data) => {
+        if (err) throw err
+        console.table(data)
+        start()
+    })
+}
+
+//--------------------Add New Employee------------------------
+
+
+const addNewEmployee = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'employeeFirstName',
+            message: 'Please provide the employee\'s first name:',
+        },
+        {
+            type: 'input',
+            name: 'employeeLaststName',
+            message: 'Please provide employee/\'s last nanme',
+        },
+        {
+            type: 'input',
+            name: 'employeeRole',
+            message: 'What is the role of the employee?',
+
+        },
+        {
+            type: 'input',
+            name: 'employeeManager',
+            message: 'Who is the employee\'s manager?',
+        }
+
+
+    ]).then(answers => {
+        connection.query("INSERT INTO employees SET ?",
+            {
+                first_name: answers.employeeFirstName,
+                last_name: answers.employeeLaststName,
+                role_id: answers.employeeRole,
+                manager_id: answers.employeeManager,
+            }
+        )
+        start()
+    })
+}
+
+
+//--------------------View All Roles------------------------
+
+const viewAllRoles = () => {
+    connection.query("SELECT * from Roles", (err, data) => {
+        if (err) throw err
+        console.table(data)
+        start()
+    })
+}
+
+
+//--------------------Add New Role------------------------
+
+
+const addNewRole = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'roleName',
+            message: 'Please provide new role:',
+        },
+        {
+            type: 'input',
+            name: 'roleSalary',
+            message: 'Whats is the salary for this role?',
         },
         {
             type: 'input',
             name: 'roleDepartment',
-            message: 'which department does this role belongs to?',
-            when: (answers) => {
-                console.log(answers)
-                if (answers.choice === "add a role") {
-                    return true;
-                }}
-          
-          },
+            message: 'Which department does this role belongs to?',
+        },
 
-          //--------------------Update an employee role------------------------
+    ]).then(answers => {
+        connection.query("INSERT INTO roles SET ?",
+            {
+                title: answers.roleName,
+                salary: answers.roleSalary,
+                department_id: answers.roleDepartment,
+            }
+        )
+        start()
+    })
+}
+//--------------------Update an employee role------------------------
 
-          {
-            type: 'input',
-            name: 'updateRole',
-            message: 'which employees role do you want to update?',
-            when: (answers) => {
-                console.log(answers)
-                if (answers.choice === "update employee role") {
-                    return true;
-                }}
-          
-          },
-          {
-            type: 'input',
-            name: 'assigNewRole',
-            message: 'which role do you want to assign the selected employee?',
-            when: (answers) => {
-                console.log(answers)
-                if (answers.choice === "update employee role") {
-                    return true;
-                }}
-          
-          },    
+// const updateEmployeeRole = () => {
+//     inquirer.prompt([
+//         {
+//             type: 'input',
+//             name: 'updateRole',
+//             message: 'which employees role do you want to update?',
+//         },
+//         {
+//             type: 'input',
+//             name: 'assignNewRole',
+//             message: 'which role do you want to assign the selected employee?',
+//         },
 
-  ];
-  
+//     ]).then(answers => {
+//         connection.query("INSERT INTO employees SET ?",
+//             {
+//                 first_name: answers.updateRole,
+//                 title: answers.assignNewRole,
+                
+//             }
+//         )
+//         start()
+//     })
+// }
+
+//--------------------Quit------------------------
+
+
+
+
+
+//--------------------Await Inquirer-----------------------
+
 const start = async () => {
 
     await inquirer.
         prompt(questions)
         .then((answers) => {
             console.log('answers ---> ', answers);
+            if (answers.choice === "view all departments") {
+                viewAllDepartments()
+            }
+            else if (answers.choice === "add new department") {
+                addNewDepartment()
+            }
+            else if (answers.choice === "view all employees") {
+                viewAllEmployees()
+            }
+            else if (answers.choice === "add new employee") {
+                addNewEmployee()
+            }
+            else if (answers.choice === "view all roles") {
+                viewAllRoles()
+            }
+            else if (answers.choice === "add new role") {
+                addNewRole()
+            }
+            else if (answers.choice === "update employee role") {
+                updateEmployeeRole()
+            }
+            else if (answers.choice === "Quit") {
+                updateEmployeeRoleRole()
+            }
         })
+
         .catch(err => {
-            if(err) throw err;
+            if (err) throw err;
         })
 }
-
-start()
-
