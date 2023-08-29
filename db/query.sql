@@ -1,27 +1,28 @@
-----update employee's role----
+-- ----update employee's role----
 
-select first_name, last_name from employee
-Where role_id = ""
+select first_name, last_name from employees
+Where role_id = "";
+
 update employee
-set role_id ''
-where employeeNumber= "";
+set role_id = ""
+where employeeNumber = "";
 
 
 
 
-----View all employees----
+-- ----View all employees----
 
-SELECT * FROM employee
-INNER JOIN role
-ON employee.role_id = role.id;
-
-
-
-----View all departments----
-
-SELECT * FROM department
+SELECT * FROM employees
+INNER JOIN roles
+ON employees.role_id = roles.id;
 
 
-----View all roles----
 
-SELECT * FROM role
+-- ----View all departments----
+
+SELECT * FROM departments;
+
+
+-- ----View all roles----
+
+SELECT * FROM roles;

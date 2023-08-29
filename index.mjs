@@ -21,36 +21,20 @@ connection.connect(function (err) {
 
 // surround inside a function that gets called from inquirer.then?
 
-function viewAll() {
-    connection.query('SELECT * FROM `employee` ', //runing comand 
-        function (err, results, fields) { // saves results from mysql shell
-            //if err then 
-            console.log(err);
-            // console.table(results); // results contains rows returned by server
-            ///console.log(fields); // fields contains extra meta data about results, if available
-
-
-            // After done showing all employees, you kick them back to the main menu with a function call:
-        }
-    );
-}
-
-
 //--------------------User Choices------------------------
 const questions = [
-
     {
         type: 'list',
         name: 'choice',
         message: "What would you like to do?  ",
         choices: ["view all departments", "add new department", "view all employees", "add new employee", "view all roles", "add new role", "update employee role", "Quit"]
 
-    },
+    }
 ]
 //--------------------View All Departments------------------------
 
 const viewAllDepartments = () => {
-    connection.query("SELECT * from department", (err, data) => {
+    connection.query("SELECT * from departments", (err, data) => {
         if (err) throw err
         console.table(data)
         start()
@@ -68,7 +52,7 @@ const addNewDepartment = () => {
             message: 'What is the name of the Department?',
         }
     ]).then(answers => {
-        connection.query("INSERT INTO department SET ?",
+        connection.query("INSERT INTO departments SET ?",
             {
                 name: answers.addNewDepartment
             }
@@ -175,43 +159,36 @@ const addNewRole = () => {
 }
 //--------------------Update an employee role------------------------
 
-// const updateEmployeeRole = () => {
-//     inquirer.prompt([
-//         {
-//             type: 'input',
-//             name: 'updateRole',
-//             message: 'which employees role do you want to update?',
-//         },
-//         {
-//             type: 'input',
-//             name: 'assignNewRole',
-//             message: 'which role do you want to assign the selected employee?',
-//         },
+const updateEmployeeRole = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'employeeUpdate',
+            message: 'which employees role do you want to update?',
+        },
+        {
+            type: 'input',
+            name: 'assignNewRole',
+            message: 'which role do you want to assign the selected employee?',
+        },
 
-//     ]).then(answers => {
-//         connection.query("INSERT INTO employees SET ?",
-//             {
-//                 first_name: answers.updateRole,
-//                 title: answers.assignNewRole,
-                
-//             }
-//         )
-//         start()
-//     })
-// }
+    ]).then(answers => {
+        connection.query("update employees set role_id = ? where id = ? ;",
+            [answers.assignNewRole, answers.employeeUpdate]
+        )
+        start()
+    })
+}
 
 //--------------------Quit------------------------
-
-
-
-
+// const close = async () => {
+// }
 
 //--------------------Await Inquirer-----------------------
 
 const start = async () => {
-
-    await inquirer.
-        prompt(questions)
+    await inquirer
+        .prompt(questions)
         .then((answers) => {
             console.log('answers ---> ', answers);
             if (answers.choice === "view all departments") {
@@ -236,11 +213,9 @@ const start = async () => {
                 updateEmployeeRole()
             }
             else if (answers.choice === "Quit") {
-                updateEmployeeRoleRole()
+                process.exit(0);
             }
-        })
-
-        .catch(err => {
+        }).catch(err => {
             if (err) throw err;
-        })
+        });
 }
