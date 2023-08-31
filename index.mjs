@@ -19,8 +19,6 @@ connection.connect(function (err) {
     start()
 })
 
-// surround inside a function that gets called from inquirer.then?
-
 //--------------------User Choices------------------------
 const questions = [
     {
@@ -55,6 +53,9 @@ const addNewDepartment = () => {
         connection.query("INSERT INTO departments SET ?",
             {
                 name: answers.addNewDepartment
+            }, (err, data) => {
+                if (err) throw err
+                console.log(`Added new department ${answers.addNewDepartment}`)
             }
         )
         start()
@@ -106,10 +107,14 @@ const addNewEmployee = () => {
                 first_name: answers.employeeFirstName,
                 last_name: answers.employeeLaststName,
                 role_id: answers.employeeRole,
-                manager_id: answers.employeeManager,
+                manager_id: answers.employeeManager || null,
+            }, (err, data) => {
+                if (err) throw err
+                console.log(`Added new employee ${answers.employeeFirstName}`)
             }
         )
-        start()
+
+        start();
     })
 }
 
@@ -175,6 +180,9 @@ const updateEmployeeRole = () => {
     ]).then(answers => {
         connection.query("update employees set role_id = ? where id = ? ;",
             [answers.assignNewRole, answers.employeeUpdate]
+            , (err, data) => {
+                if (err) throw err
+            }
         )
         start()
     })
